@@ -16,4 +16,8 @@ public class Main {
 =======
 	}// hello from the other side
 }
+<<<<<<< HEAD
+>>>>>>> branch 'master' of https://github.com/mhoangcs/HornsOfHavoc.git
+=======
+// Bob the Builder, "Yes We Can"
 >>>>>>> branch 'master' of https://github.com/mhoangcs/HornsOfHavoc.git
