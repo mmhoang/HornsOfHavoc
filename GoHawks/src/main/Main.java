@@ -9,6 +9,11 @@ public class Main {
 		
 		// Comment
 		
+<<<<<<< HEAD
 	}
-// Doot Doot Dot
+// Doot Doot Dot, Pew Pew Pew
 }
+=======
+	}// hello from the other side
+}
+>>>>>>> branch 'master' of https://github.com/mhoangcs/HornsOfHavoc.git
