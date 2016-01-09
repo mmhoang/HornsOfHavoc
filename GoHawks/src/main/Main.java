@@ -8,5 +8,5 @@ public class Main {
 		System.out.println("Go Hawks!");
 		System.out.println("Blue Friday");
 	}
-
+// Doot Doot
 }
