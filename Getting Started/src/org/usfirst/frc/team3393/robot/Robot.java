@@ -3,6 +3,7 @@ package org.usfirst.frc.team3393.robot;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 /**
@@ -33,19 +34,37 @@ public class Robot extends IterativeRobot {
      */
     public void autonomousInit() {
     	autoLoopCounter = 0;
+//    	myRobot.drive(0.5, 0.0); // drive 50% fwd 0% turn  
+//    	Timer.delay(2.0);   // wait 2 seconds  
+//    	myRobot.drive(0.0, 0.75); // drive 0% fwd, 75% turn 
+//    	myRobot.drive(0.0, 0.0); 
     }
 
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-    	if(autoLoopCounter < 100) //Check if we've completed 100 loops (approximately 2 seconds)
-		{
-			myRobot.drive(-0.5, -5.0); 	// drive forwards half speed
-			autoLoopCounter++;
-			} else {
-			myRobot.drive(0.0, 0.0); 	// stop robot
-		}
+    	
+    	
+    	if(autoLoopCounter < 140) { //Checks to see if the counter has reached 100 yet
+            myRobot.drive(0.5, -0.375);  //If the robot hasn't reached 100 packets yet, the robot is set to drive forward at half speed, the next line increments the counter by 1
+            autoLoopCounter++;
+       } else {
+            myRobot.drive(0.0, 0.0); //If the robot has reached 100 packets, this line tells the robot to stop
+       } 
+    	
+    	
+    	//1.turn 180 degrees
+//    	for(int i = 0; i < 2; i++) {
+//    		myRobot.drive(0.2, 0.0);
+//    	}
+//    	myRobot.drive(0.0, 0.0);
+    	//2.drive 15ft reverse
+    	//3. turn 135 degrees left
+    	//4. drive forward 8ft
+    	//5. release ball
+    	//
+
     }
     
     /**
