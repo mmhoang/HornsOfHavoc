@@ -44,16 +44,19 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-    	
-    	
-    	if(autoLoopCounter < 140) { //Checks to see if the counter has reached 100 yet
-            myRobot.drive(0.5, -0.375);  //If the robot hasn't reached 100 packets yet, the robot is set to drive forward at half speed, the next line increments the counter by 1
-            autoLoopCounter++;
-       } else {
-            myRobot.drive(0.0, 0.0); //If the robot has reached 100 packets, this line tells the robot to stop
-       } 
-    	
-    	
+		if (autoLoopCounter < 150) { // going straight and crossing low bar			 
+			myRobot.drive(0.5, 0.0); 							
+			autoLoopCounter++;
+		} else if (autoLoopCounter < 210) { // Turning 135 degrees after crossing low bar to shoot								
+			myRobot.drive(0.475, 1.1635); 							
+			autoLoopCounter++;
+		} else if (autoLoopCounter < 290){ // Turning 135 degrees after crossing low bar to shoot								
+			myRobot.drive(-0.5, 0.0); 	// From 6in to 8in wheel factor = .766798419						
+			autoLoopCounter++;
+		} else {
+			myRobot.drive(0.0, 0.0); // If the robot has reached 100 packets,
+									// this line tells the robot to stop
+		}
     	//1.turn 180 degrees
 //    	for(int i = 0; i < 2; i++) {
 //    		myRobot.drive(0.2, 0.0);
