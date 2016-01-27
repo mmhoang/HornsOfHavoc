@@ -2,6 +2,7 @@ package org.usfirst.frc.team3393.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -26,7 +27,9 @@ public class Robot extends IterativeRobot {
     	myRobot = new RobotDrive(0,1,2,3); // Added Motors 2 and 3 to make all motors run.
     	right = new Joystick(1);
     	left = new Joystick(3);//hello//
-  
+//    	Relay exampleRelay = new Relay(13);
+//    	exampleRelay.set(Relay.Value.kOn);
+//    	exampleRelay.set(Relay.Value.kForward);
     }
     
     /**
@@ -44,20 +47,30 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
+    	
 		if (autoLoopCounter < 150) { // going straight and crossing low bar			 
 			myRobot.drive(0.5, 0.0); 							
 			autoLoopCounter++;
 		} else if (autoLoopCounter < 210) { // Turning 135 degrees after crossing low bar to shoot								
-			myRobot.drive(0.475, 1.1635); 							
+			myRobot.drive(0.475, 0.935); 							
 			autoLoopCounter++;
-		} else if (autoLoopCounter < 290){ // Turning 135 degrees after crossing low bar to shoot								
-			myRobot.drive(-0.5, 0.0); 	// From 6in to 8in wheel factor = .766798419						
+		} else if (autoLoopCounter < 290) {// Robot is going to stop for 40 loops to shoot
+			myRobot.drive(0.0, 0.0); // If the robot has reached 100 packets,
+			autoLoopCounter++;						// this line tells the robot to stop
+		} else if (autoLoopCounter < 330) {
+			myRobot.drive(0.475, 0.49);
+			autoLoopCounter++;
+		} else if (autoLoopCounter < 480) {					
+			myRobot.drive(0.5, 0.0);
 			autoLoopCounter++;
 		} else {
-			myRobot.drive(0.0, 0.0); // If the robot has reached 100 packets,
-									// this line tells the robot to stop
-		}
-    	//1.turn 180 degrees
+			myRobot.drive(0.0,0.0);
+		} 
+		
+		
+		
+    	
+			//1.turn 180 degrees
 //    	for(int i = 0; i < 2; i++) {
 //    		myRobot.drive(0.2, 0.0);
 //    	}
@@ -89,5 +102,19 @@ public class Robot extends IterativeRobot {
     public void testPeriodic() {
     	LiveWindow.run();
     }
-    
+   private void autonomous1(){
+	   if (autoLoopCounter < 150) { // going straight and crossing low bar			 
+			myRobot.drive(0.5, 0.0); 							
+			autoLoopCounter++;
+		} else if (autoLoopCounter < 210) { // Turning 135 degrees after crossing low bar to shoot								
+			myRobot.drive(0.475, 1.1635); 							
+			autoLoopCounter++;
+		} else if (autoLoopCounter < 290){ // Turning 135 degrees after crossing low bar to shoot								
+			myRobot.drive(-0.5, 0.0); 	// From 6in to 8in wheel factor = .766798419						
+			autoLoopCounter++;
+		} else {
+			myRobot.drive(0.0, 0.0); // If the robot has reached 100 packets,
+									// this line tells the robot to stop
+		}   
+   }
 }
