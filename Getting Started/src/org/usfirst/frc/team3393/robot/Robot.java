@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 /**
@@ -18,6 +19,7 @@ public class Robot extends IterativeRobot {
 	RobotDrive myRobot;
 	Joystick left, right;
 	int autoLoopCounter;
+	Victor shooter = new Victor(4);
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -94,6 +96,16 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
         myRobot.tankDrive(left,right);
+        
+        // This works!
+        if(right.getRawButton(1)){
+        	shooter.set(1.0);
+        } else if(left.getRawButton(1)) {
+        	shooter.set(-1.0);
+        } else if (right.getRawButton(3) || left.getRawButton(3)) {
+        	shooter.set(0.0);
+        }
+        
     }
     
     /**
