@@ -127,19 +127,29 @@ public class Robot extends IterativeRobot {
 			myRobot.drive(0.0,0.0);
 		}    
    }
+   //move one foot forword 
+   //pick up ball
+  //move 5 feet reverse
+   //turn 180
+   //drive 6 ft reach barior 
    private void autonomous3(){
+	 //move one foot forword 
 	   if (autoLoopCounter < 75) {
 			myRobot.drive(-0.25, 0.0);
 			autoLoopCounter++;
 		} else if (autoLoopCounter == 75) {
+			 //pick up ball
 			Timer.delay(1);
 			autoLoopCounter++;
 		} else if (autoLoopCounter < 175) {
 			myRobot.drive(0.4, 0.0);
+			//move 5 feet reverse
 			autoLoopCounter++;
 		} else if (autoLoopCounter < 300) {
+			//turn 180
 			myRobot.drive(0.445, 1.2);
-			autoLoopCounter++;
+			
+		 autoLoopCounter++;
 		} else {
 			myRobot.drive(0.0, 0.0);
 		}   
