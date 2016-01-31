@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 public class Robot extends IterativeRobot {
 	RobotDrive myRobot;
 	Joystick left, right;
+	int toggle;
 	int autoLoopCounter;
 	Victor shooter = new Victor(4);
 	
@@ -26,6 +27,7 @@ public class Robot extends IterativeRobot {
      * used for any initialization code.
      */
     public void robotInit() {
+    	toggle=3;
     	myRobot = new RobotDrive(0,1,2,3); // Added Motors 2 and 3 to make all motors run.
     	right = new Joystick(1);
     	left = new Joystick(3);//hello//
@@ -48,42 +50,16 @@ public class Robot extends IterativeRobot {
     /**
      * This function is called periodically during autonomous
      */
-    public void autonomousPeriodic() {
-    	
-		if (autoLoopCounter < 150) { // going straight and crossing low bar			 
-			myRobot.drive(0.5, 0.0); 							
-			autoLoopCounter++;
-		} else if (autoLoopCounter < 210) { // Turning 135 degrees after crossing low bar to shoot								
-			myRobot.drive(0.475, 0.935); 							
-			autoLoopCounter++;
-		} else if (autoLoopCounter < 290) {// Robot is going to stop for 40 loops to shoot
-			myRobot.drive(0.0, 0.0); // If the robot has reached 100 packets,
-			autoLoopCounter++;						// this line tells the robot to stop
-		} else if (autoLoopCounter < 330) {
-			myRobot.drive(0.475, 0.49);
-			autoLoopCounter++;
-		} else if (autoLoopCounter < 480) {					
-			myRobot.drive(0.5, 0.0);
-			autoLoopCounter++;
-		} else {
-			myRobot.drive(0.0,0.0);
-		} 
+	public void autonomousPeriodic() {
+		if (toggle == 1){
+			autonomous1();
+		}else if (toggle == 2){
+			autonomous2();}
+		else{
+			autonomous3();
+		}
 		
-		
-		
-    	
-			//1.turn 180 degrees
-//    	for(int i = 0; i < 2; i++) {
-//    		myRobot.drive(0.2, 0.0);
-//    	}
-//    	myRobot.drive(0.0, 0.0);
-    	//2.drive 15ft reverse
-    	//3. turn 135 degrees left
-    	//4. drive forward 8ft
-    	//5. release ball
-    	//
-
-    }
+	}
     
     /**
      * This function is called once each time the robot enters tele-operated mode
@@ -104,8 +80,10 @@ public class Robot extends IterativeRobot {
         	shooter.set(-1.0);
         } else if (right.getRawButton(3) || left.getRawButton(3)) {
         	shooter.set(0.0);
+        } else 
+        while (right.getRawButton(1)) {
+        	shooter.set(1.0);
         }
-        
     }
     
     /**
@@ -129,4 +107,41 @@ public class Robot extends IterativeRobot {
 									// this line tells the robot to stop
 		}   
    }
-}
+   private void autonomous2() {
+	   if (autoLoopCounter < 150) { // going straight and crossing low bar			 
+			myRobot.drive(0.5, 0.0); 							
+			autoLoopCounter++;
+		} else if (autoLoopCounter < 210) { // Turning 135 degrees after crossing low bar to shoot								
+			myRobot.drive(0.475, 0.935); 							
+			autoLoopCounter++;
+		} else if (autoLoopCounter < 290) {// Robot is going to stop for 40 loops to shoot
+			myRobot.drive(0.0, 0.0); // If the robot has reached 100 packets,
+			autoLoopCounter++;						// this line tells the robot to stop
+		} else if (autoLoopCounter < 330) {
+			myRobot.drive(0.475, 0.49);
+			autoLoopCounter++;
+		} else if (autoLoopCounter < 400) {					
+			myRobot.drive(0.5, 0.0);
+			autoLoopCounter++;
+		} else {
+			myRobot.drive(0.0,0.0);
+		}    
+   }
+   private void autonomous3(){
+	   if (autoLoopCounter < 75) {
+			myRobot.drive(-0.25, 0.0);
+			autoLoopCounter++;
+		} else if (autoLoopCounter == 75) {
+			Timer.delay(1);
+			autoLoopCounter++;
+		} else if (autoLoopCounter < 175) {
+			myRobot.drive(0.4, 0.0);
+			autoLoopCounter++;
+		} else if (autoLoopCounter < 300) {
+			myRobot.drive(0.445, 1.2);
+			autoLoopCounter++;
+		} else {
+			myRobot.drive(0.0, 0.0);
+		}   
+   }
+   }
