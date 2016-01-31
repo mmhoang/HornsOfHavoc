@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -19,6 +20,8 @@ public class Robot extends IterativeRobot {
 	RobotDrive myRobot;
 	Joystick left, right;
 	int toggle;
+	Solenoid _armPistonOut;
+	Solenoid _armPistonIn;
 	int autoLoopCounter;
 	Victor shooter = new Victor(4);
 	
@@ -28,6 +31,8 @@ public class Robot extends IterativeRobot {
      */
     public void robotInit() {
     	toggle=3;
+    	_armPistonIn = new Solenoid(0);
+    	_armPistonOut = new Solenoid(1);
     	myRobot = new RobotDrive(0,1,2,3); // Added Motors 2 and 3 to make all motors run.
     	right = new Joystick(1);
     	left = new Joystick(3);//hello//
@@ -72,18 +77,24 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
         myRobot.tankDrive(left,right);
-        
+        if (right.getTrigger()) {
+    		_armPistonIn.set(false);
+    		_armPistonOut.set(true);
+    	} else {
+    		_armPistonIn.set(true);
+    		_armPistonOut.set(false);
+    	}
         // This works!
-        if(right.getRawButton(1)){
-        	shooter.set(1.0);
-        } else if(left.getRawButton(1)) {
-        	shooter.set(-1.0);
-        } else if (right.getRawButton(3) || left.getRawButton(3)) {
-        	shooter.set(0.0);
-        } else 
-        while (right.getRawButton(1)) {
-        	shooter.set(1.0);
-        }
+//        if(right.getRawButton(1)){
+//        	shooter.set(1.0);
+//        } else if(left.getRawButton(1)) {
+//        	shooter.set(-1.0);
+//        } else if (right.getRawButton(3) || left.getRawButton(3)) {
+//        	shooter.set(0.0);
+//        } else 
+//        while (right.getRawButton(1)) {
+//        	shooter.set(1.0);
+//        }
     }
     
     /**
