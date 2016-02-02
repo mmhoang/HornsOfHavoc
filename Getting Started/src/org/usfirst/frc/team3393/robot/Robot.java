@@ -30,9 +30,9 @@ public class Robot extends IterativeRobot {
      * used for any initialization code.
      */
     public void robotInit() {
-    	toggle=3;
-    	_armPistonIn = new Solenoid(0);
-    	_armPistonOut = new Solenoid(1);
+    	toggle=2;
+//   	_armPistonIn = new Solenoid(0);
+//    	_armPistonOut = new Solenoid(1);
     	myRobot = new RobotDrive(0,1,2,3); // Added Motors 2 and 3 to make all motors run.
     	right = new Joystick(1);
     	left = new Joystick(3);//hello//
@@ -56,14 +56,16 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during autonomous
      */
 	public void autonomousPeriodic() {
-		if (toggle == 1){
+		if (toggle == 1) {
 			autonomous1();
-		}else if (toggle == 2){
-			autonomous2();}
-		else{
+		} else if (toggle == 2) {
+			autonomous2();
+		} else if (toggle == 3) {
 			autonomous3();
+		} else {
+			// This is an error condition
+			System.out.print("No autonomous mode here.");
 		}
-		
 	}
     
     /**
@@ -119,23 +121,26 @@ public class Robot extends IterativeRobot {
 		}   
    }
    private void autonomous2() {
-	   if (autoLoopCounter < 150) { // going straight and crossing low bar			 
+	   if (autoLoopCounter < 80) { // going straight and crossing low bar for 16 feet			 
 			myRobot.drive(0.5, 0.0); 							
 			autoLoopCounter++;
-		} else if (autoLoopCounter < 210) { // Turning 135 degrees after crossing low bar to shoot								
-			myRobot.drive(0.475, 0.935); 							
+		} else if (autoLoopCounter < 200) { // fix the odd right turn/angle. Increased autoLoopCounter
+			myRobot.drive(0.5, -0.32); 	//turn to fix odd right turn						
+			autoLoopCounter++;         //THIS TURN IS WRONG!!!!!!
+        } else if (autoLoopCounter < 270) { // Turning 135 degrees after crossing low bar to shoot								
+			myRobot.drive(0.475, 1.2); 	//made the turn from 0.935 to whatever else				
 			autoLoopCounter++;
-		} else if (autoLoopCounter < 290) {// Robot is going to stop for 40 loops to shoot
-			myRobot.drive(0.0, 0.0); // If the robot has reached 100 packets,
-			autoLoopCounter++;						// this line tells the robot to stop
-		} else if (autoLoopCounter < 330) {
-			myRobot.drive(0.475, 0.49);
+		} else if (autoLoopCounter < 350) {// Robot is going to stop for 40 loops to stop and drop ball
+			myRobot.drive(0.0, 0.0); // 
+			autoLoopCounter++;						
+		} else if (autoLoopCounter < 390) {     
+			myRobot.drive(0.475, 0.4);			//made the turn from .49 to whatever else
 			autoLoopCounter++;
-		} else if (autoLoopCounter < 400) {					
+		} else if (autoLoopCounter < 500) {	// should return to normal starting position  				
 			myRobot.drive(0.5, 0.0);
 			autoLoopCounter++;
 		} else {
-			myRobot.drive(0.0,0.0);
+			myRobot.drive(0.0,0.0);        //increased autoLoopCounter by 60
 		}    
    }
    //move one foot forword 
@@ -144,7 +149,7 @@ public class Robot extends IterativeRobot {
    //turn 180
    //drive 6 ft reach barior 
    private void autonomous3(){
-	 //move one foot forword 
+	 //move one foot forward 
 	   if (autoLoopCounter < 75) {
 			myRobot.drive(-0.25, 0.0);
 			autoLoopCounter++;
