@@ -1,12 +1,13 @@
 package org.usfirst.frc.team3393.robot;
 
-import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Relay;
-import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.*;
+//import edu.wpi.first.wpilibj.Joystick;
+//import edu.wpi.first.wpilibj.Relay;
+//import edu.wpi.first.wpilibj.RobotDrive;
+//import edu.wpi.first.wpilibj.Solenoid;
+//import edu.wpi.first.wpilibj.Talon;
+//import edu.wpi.first.wpilibj.Timer;
+//import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 /**
@@ -18,10 +19,12 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
  */
 public class Robot extends IterativeRobot {
 	RobotDrive myRobot;
-	Joystick left, right;
+	Joystick left, right,control;
+	Solenoid downLift, upLift;
+	Solenoid frontDownLift, frontUpLift;
 	int toggle;
-	Solenoid _armPistonOut;
-	Solenoid _armPistonIn;
+	//Solenoid _armPistonOut;
+	//Solenoid _armPistonIn;
 	int autoLoopCounter;
 	Victor shooter = new Victor(4);
 	
@@ -30,12 +33,16 @@ public class Robot extends IterativeRobot {
      * used for any initialization code.
      */
     public void robotInit() {
-    	toggle=2;
-//   	_armPistonIn = new Solenoid(0);
-//    	_armPistonOut = new Solenoid(1);
+    	toggle=3;
+    	//_armPistonIn = new Solenoid(0); // sometimes better to switch wires than to rewrite code
+    	//_armPistonOut = new Solenoid(1);
+    	frontDownLift = new Solenoid(1);
+    	frontUpLift = new Solenoid(3);
     	myRobot = new RobotDrive(0,1,2,3); // Added Motors 2 and 3 to make all motors run.
     	right = new Joystick(1);
     	left = new Joystick(3);//hello//
+        downLift=new Solenoid(6);
+    	upLift=new Solenoid(7);
 //    	Relay exampleRelay = new Relay(13);
 //    	exampleRelay.set(Relay.Value.kOn);
 //    	exampleRelay.set(Relay.Value.kForward);
@@ -79,26 +86,55 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
         myRobot.tankDrive(left,right);
-        if (right.getTrigger()) {
-    		_armPistonIn.set(false);
-    		_armPistonOut.set(true);
-    	} else {
-    		_armPistonIn.set(true);
-    		_armPistonOut.set(false);
-    	}
-        // This works!
-//        if(right.getRawButton(1)){
-//        	shooter.set(1.0);
-//        } else if(left.getRawButton(1)) {
-//        	shooter.set(-1.0);
-//        } else if (right.getRawButton(3) || left.getRawButton(3)) {
-//        	shooter.set(0.0);
-//        } else 
-//        while (right.getRawButton(1)) {
-//        	shooter.set(1.0);
-//        }
-    }
-    
+//        if (right.getTrigger()) {
+//    	//	_armPistonIn.set(false);
+//    	//	_armPistonOut.set(true);
+//    	} else {
+//    	//	_armPistonIn.set(true);
+//    	//	_armPistonOut.set(false);
+//    	}
+         //This works!
+         // press and release for joystick trigger number 5 motor 
+        while (right.getRawButton(1)) {
+        	shooter.set(1.0);
+        }
+		while (left.getRawButton(1)) {
+			shooter.set(-1.0);
+		}
+		shooter.set(0.0);
+
+		if (left.getRawButton(10)) {
+			downLift.set(true);
+			upLift.set(false);
+		} else if (left.getRawButton(7)) {
+			downLift.set(false);
+			upLift.set(true);
+		}
+		if (left.getRawButton(11)) {
+			frontDownLift.set(true);
+			frontUpLift.set(false);
+		} else if (left.getRawButton(6)) {
+			frontDownLift.set(false);
+			frontUpLift.set(true);
+		}
+//          //if(left.getRawbutton(x)){
+//        	  Relay.set(Relay.Value.bForward);
+//          }
+//          else if (left.getRawButton(x));{
+//        	  Relay.set(Relay.Value.bReverse);
+//          }
+//          else{
+//        	  Relay.setDefaultSolenoidModule(Relay.Value.koff);
+//          }
+//          if(left.getRawButton(x));{
+//        	  dsolenoid.set(Relay.Value.bReverse);
+//          }
+//          else if(left.getRawButton(x)){
+//          dsolenoid.set(DoubleSolenoid.Value.kForward);
+//          }
+        }  
+        	 
+        
     /**
      * This function is called periodically during test mode
      */
@@ -155,6 +191,7 @@ public class Robot extends IterativeRobot {
 			autoLoopCounter++;
 		} else if (autoLoopCounter == 75) {
 			 //pick up ball
+			
 			Timer.delay(1);
 			autoLoopCounter++;
 		} else if (autoLoopCounter < 175) {
@@ -163,7 +200,7 @@ public class Robot extends IterativeRobot {
 			autoLoopCounter++;
 		} else if (autoLoopCounter < 300) {
 			//turn 180
-			myRobot.drive(0.445, 1.2);
+			myRobot.drive(0.445, 1.2); // Turn is 1.2 Drive is 0.445
 			
 		 autoLoopCounter++;
 		} else {
