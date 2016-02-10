@@ -1,7 +1,9 @@
 package org.usfirst.frc.team3393.robot;
 
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -11,21 +13,29 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
  * directory.
  */
 public class Robot extends IterativeRobot {
-	RobotDrive myRobot;
+	RobotDrive myRobot; 
 	Joystick left, right, control;
 	Solenoid downLift, upLift;
 	Solenoid frontDownLift, frontUpLift;
 	int toggle;
-	int autoLoopCounter;
-	Victor shooter = new Victor(4);
-
+	Victor shooter;
+	
+	Timer _aTimer;
+	Accelerometer _accelerometer;
+	
+	AnalogGyro _gyro;
+	
+	double _velocity;
+	double _displacement;
+	Timer _eTimer;
+ 
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
 	 */
 	public void robotInit() {
 		toggle = 1;
-
+		shooter = new Victor(6);
 		frontDownLift = new Solenoid(1);
 		frontUpLift = new Solenoid(3);
 		myRobot = new RobotDrive(0, 1, 2, 3); // Added Motors 2 and 3 to make
@@ -34,23 +44,41 @@ public class Robot extends IterativeRobot {
 		left = new Joystick(3);
 		downLift = new Solenoid(6);
 		upLift = new Solenoid(7);
+		
+		this._aTimer = new Timer();
+		this._accelerometer = new BuiltInAccelerometer();
+		
+		this._gyro = new AnalogGyro(0);
+		
+		this._velocity = 0;
+		this._displacement = 0;
+		this._eTimer = new Timer();
+		
 	}
 
 	/**
 	 * This function is run once each time the robot enters autonomous mode
 	 */
 	public void autonomousInit() {
-		autoLoopCounter = 0;
+		this._aTimer.start();
 		// myRobot.drive(0.5, 0.0); // drive 50% fwd 0% turn
 		// Timer.delay(2.0); // wait 2 seconds
 		// myRobot.drive(0.0, 0.75); // drive 0% fwd, 75% turn
 		// myRobot.drive(0.0, 0.0);
+		
+		this._gyro.reset();
+		
+		this.resetDistance();
+		
+		this._eTimer.start();
 	}
 
 	/**
 	 * This function is called periodically during autonomous
 	 */
 	public void autonomousPeriodic() {
+		this.updateDistance();
+		
 		if (toggle == 1) {
 			autonomous1();
 		} else if (toggle == 2) {
@@ -74,6 +102,8 @@ public class Robot extends IterativeRobot {
 	 * This function is called periodically during operator control
 	 */
 	public void teleopPeriodic() {
+		this.updateDistance();
+		
 		myRobot.tankDrive(left, right);
 
 		// This works!
@@ -124,51 +154,69 @@ public class Robot extends IterativeRobot {
 		LiveWindow.run();
 	}
 
+	enum Auto1State {
+		DRIVE_FORWARD,
+		FINISH
+	}
+	Auto1State auto1State = Auto1State.DRIVE_FORWARD;
 	private void autonomous1() {
-		if (autoLoopCounter < 160) { // going straight and crossing low bar, 150
-			myRobot.drive(0.5, 0.0);
-			autoLoopCounter++;
-		} else if (autoLoopCounter < 220) { // Turning 135 degrees after
-											// crossing low bar to shoot,220
-			myRobot.drive(0.475, 1.1635);
-			autoLoopCounter++;
-		} else if (autoLoopCounter < 300) { // 290
-			myRobot.drive(-0.5, 0.0); // From 6in to 8in wheel factor =
-										// .766798419
-			autoLoopCounter++;
-		} else {
-			myRobot.drive(0.0, 0.0); // If the robot has reached 100 packets,
-			shooter.set(1.0); // this line tells the robot to stop
-
+		if(auto1State == Auto1State.DRIVE_FORWARD) {
+			myRobot.tankDrive(0.4, 0.4);
+			
+			// Stop after 3 meters
+			if(this.getDistance() >= 3.0) {
+				this._aTimer.stop();
+				this._aTimer.reset();
+				this._aTimer.start();
+				
+				// Reset distance because we're turning in the next state
+				this.resetDistance();
+				
+				auto1State = Auto1State.FINISH;
+			}
+		}else if(auto1State == Auto1State.FINISH) {
+			myRobot.tankDrive(0, 0);
 		}
+//		
+//		if (this._aTimer.get() >= 4.0) { // going straight and crossing low bar, 150,160(recent)
+//			myRobot.drive(0.4, 0.0);
+//			this._aTimer.reset();
+//    //		} else if (autoLoopCounter < 220) { // Turning 135 degrees after
+//	//										// crossing low bar to shoot,220
+//	//	myRobot.drive(0.475, 1.1635);
+////			autoLoopCounter++;
+////		} else if (autoLoopCounter < 300) { // 290
+////			myRobot.drive(-0.5, 0.0); // From 6in to 8in wheel factor =
+////										// .766798419
+////			autoLoopCounter++;
+////		} else {
+////			myRobot.drive(0.0, 0.0); // If the robot has reached 100 packets,
+////			shooter.set(1.0); // this line tells the robot to stop
+//
+//		}
 	}
 
+	
 	private void autonomous2() {
-		if (autoLoopCounter < 80) { // going straight and crossing low bar for
+		if (this._aTimer.get() <= 4.0) { // going straight and crossing low bar for
 									// 16 feet
 			myRobot.drive(0.5, 0.0);
-			autoLoopCounter++;
-		} else if (autoLoopCounter < 200) { // fix the odd right turn/angle.
+		} else if (this._aTimer.get() <= 6.0) { // fix the odd right turn/angle.
 											// Increased autoLoopCounter
 			myRobot.drive(0.5, -0.32); // turn to fix odd right turn
-			autoLoopCounter++; // THIS TURN IS WRONG!!!!!!
-		} else if (autoLoopCounter < 270) { // Turning 135 degrees after
+		} else if (this._aTimer.get() <= 8.0) { // Turning 135 degrees after
 											// crossing low bar to shoot
 			myRobot.drive(0.475, 1.2); // made the turn from 0.935 to whatever
 										// else
-			autoLoopCounter++;
-		} else if (autoLoopCounter < 350) {// Robot is going to stop for 40
+		} else if (this._aTimer.get() <= 10.0) {// Robot is going to stop for 40
 											// loops to stop and drop ball
 			myRobot.drive(0.0, 0.0); //
-			autoLoopCounter++;
-		} else if (autoLoopCounter < 390) {
+		} else if (this._aTimer.get() <= 12.0) {
 			myRobot.drive(0.475, 0.4); // made the turn from .49 to whatever
 										// else
-			autoLoopCounter++;
-		} else if (autoLoopCounter < 500) { // should return to normal starting
+		} else if (this._aTimer.get() <= 14.0) { // should return to normal starting
 											// position
 			myRobot.drive(0.5, 0.0);
-			autoLoopCounter++;
 		} else {
 			myRobot.drive(0.0, 0.0); // increased autoLoopCounter by 60
 		}
@@ -179,27 +227,89 @@ public class Robot extends IterativeRobot {
 	// move 5 feet reverse
 	// turn 180
 	// drive 6 ft reach barior
+	enum Auto3State {
+		DRIVE_FORWARD_3,
+		BALL_PICKUP,
+		DRIVE_REVERSE,
+		TURN_AROUND,
+		FINISH
+	}
+	Auto3State auto3State = Auto3State.DRIVE_FORWARD_3;
 	private void autonomous3() {
-		// move one foot forward
-		if (autoLoopCounter < 75) {
-			myRobot.drive(-0.25, 0.0);
-			autoLoopCounter++;
-		} else if (autoLoopCounter == 75) {
-			// pick up ball
-
-			Timer.delay(1);
-			autoLoopCounter++;
-		} else if (autoLoopCounter < 175) {
-			myRobot.drive(0.4, 0.0);
-			// move 5 feet reverse
-			autoLoopCounter++;
-		} else if (autoLoopCounter < 300) {
-			// turn 180
-			myRobot.drive(0.445, 1.2); // Turn is 1.2 Drive is 0.445
-
-			autoLoopCounter++;
-		} else {
-			myRobot.drive(0.0, 0.0);
+		if(auto3State == Auto3State.DRIVE_FORWARD_3) {
+			myRobot.tankDrive(-0.25, -0.25);
+			
+			if(this._aTimer.get() >= 1.0) {
+				this._aTimer.stop();
+				this._aTimer.reset();
+				this._aTimer.start();
+				
+				auto3State = Auto3State.BALL_PICKUP;
+			}
+		}else if(auto3State == Auto3State.BALL_PICKUP) {
+			// Pick up ball
+			
+			if(this._aTimer.get() >= 1.0) {
+				this._aTimer.stop();
+				this._aTimer.reset();
+				this._aTimer.start();
+				
+				auto3State = Auto3State.DRIVE_REVERSE;
+			}
+		}else if(auto3State == Auto3State.DRIVE_REVERSE) {
+			myRobot.tankDrive(0.4, 0.4);
+			
+			if(this._aTimer.get() >= 2.0) {
+				this._aTimer.stop();
+				this._aTimer.reset();
+				this._aTimer.start();
+				
+				auto3State = Auto3State.TURN_AROUND;
+			}
+		}else if(auto3State == Auto3State.TURN_AROUND) {
+			myRobot.tankDrive(0.5, -0.5);
+			
+			if(this._gyro.getAngle() >= 180) {
+				this._aTimer.stop();
+				this._aTimer.reset();
+				this._aTimer.start();
+				
+				this._gyro.reset();
+				
+				auto3State = Auto3State.FINISH;
+			}
+		}else if(auto3State == Auto3State.FINISH) {
+			myRobot.tankDrive(0, 0);
 		}
+		
+//		// move one foot forward
+//		if (this._aTimer.get() <= 4.0) {
+//			myRobot.drive(-0.25, 0.0);
+//		} else if (this._aTimer.get() <= 6.0) {
+//			// pick up ball
+//
+//			Timer.delay(1);
+//		} else if (this._aTimer.get() <= 8.0) {
+//			myRobot.drive(0.4, 0.0);
+//			// move 5 feet reverse
+//		} else if (this._aTimer.get() <= 10.0) {
+//			// turn 180
+//			myRobot.drive(0.445, 1.2); // Turn is 1.2 Drive is 0.445
+//
+//		} else {
+//			myRobot.drive(0.0, 0.0);
+//		}
+	}
+	
+	private void updateDistance() {
+		this._velocity = this._accelerometer.getY() * this._eTimer.get();
+		this._displacement = this._velocity * this._eTimer.get();
+	}
+	private double getDistance() {
+		return this._displacement;
+	}
+	private void resetDistance() {
+		this._velocity = 0.0;
+		this._displacement = 0.0;
 	}
 }
