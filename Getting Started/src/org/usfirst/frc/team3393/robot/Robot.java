@@ -3,7 +3,9 @@ package org.usfirst.frc.team3393.robot;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+// ******* After initializing the SendableChooser, configs will show up in the
+// SmartDashboard (with the driver station) ********
+//import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -36,10 +38,9 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		toggle = 1;
 		shooter = new Victor(6);
-		frontDownLift = new Solenoid(1);
-		frontUpLift = new Solenoid(3);
-		myRobot = new RobotDrive(0, 1, 2, 3); // Added Motors 2 and 3 to make
-												// all motors run.
+		frontDownLift = new Solenoid(6);
+		frontUpLift = new Solenoid(7);
+		myRobot = new RobotDrive(0, 1, 2, 3); // Added Motors 2 and 3 to make all motors run
 		right = new Joystick(1);
 		left = new Joystick(3);
 		downLift = new Solenoid(6);
@@ -95,9 +96,10 @@ public class Robot extends IterativeRobot {
 	 * This function is called once each time the robot enters tele-operated
 	 * mode
 	 */
-	public void teleopInit() {
+	public void teleopInit() { 
+		myRobot = new RobotDrive(4, 5, 6, 7);	
 	}
-
+	
 	/**
 	 * This function is called periodically during operator control
 	 */
