@@ -198,14 +198,14 @@ public class Robot extends IterativeRobot {
 		if (this._aTimer.get() >= 4.0) { // going straight and crossing low bar, 150,160(recent)
 			myRobot.drive(0.4, 0.0);
 			this._aTimer.reset();
-    		} else if (autoLoopCounter < 220) { // Turning 135 degrees after
+    		} else if (this._aTimer.get() >= 4.0) { // Turning 135 degrees after
 											// crossing low bar to shoot,220
 		myRobot.drive(0.475, 1.1635);
-			autoLoopCounter++;
-		} else if (autoLoopCounter < 300) { // 290
+		//	autoLoopCounter++;
+		} else if (this._aTimer.get() >= 4.0) { // 290
 			myRobot.drive(-0.5, 0.0); // From 6in to 8in wheel factor =
 										// .766798419
-			autoLoopCounter++;
+		//	autoLoopCounter++;
 		} else {
 			myRobot.drive(0.0, 0.0); // If the robot has reached 100 packets,
 			shooter.set(1.0); // this line tells the robot to stop
