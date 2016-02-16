@@ -18,33 +18,36 @@ public class Robot extends IterativeRobot {
 	RobotDrive myRobot; 
 	Joystick left, right, control;
 	Solenoid downLift, upLift;
-	Solenoid frontDownLift, frontUpLift;
+	Solenoid frontDownLift, frontUpLift; 
 	int toggle;
 	Victor shooter;
-	
+	Victor climber1;
+	Victor climber2;
 	Timer _aTimer;
 	Accelerometer _accelerometer;
 	
 	AnalogGyro _gyro;
 	
 	double _velocity;
-	double _displacement;
+	double _displacement; 
 	Timer _eTimer;
  
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
-	 */
+	 */ 
 	public void robotInit() {
 		toggle = 1;
 		shooter = new Victor(6);
-		frontDownLift = new Solenoid(6);
-		frontUpLift = new Solenoid(7);
+		climber1 = new Victor(4);
+		climber2 = new Victor(5);
+		frontDownLift = new Solenoid(2); //4 and 5
+		frontUpLift = new Solenoid(3);
 		myRobot = new RobotDrive(0, 1, 2, 3); // Added Motors 2 and 3 to make all motors run
 		right = new Joystick(1);
 		left = new Joystick(3);
-		downLift = new Solenoid(6);
-		upLift = new Solenoid(7);
+		downLift = new Solenoid(0); //6 and 7
+		upLift = new Solenoid(1);
 		
 		this._aTimer = new Timer();
 		this._accelerometer = new BuiltInAccelerometer();
@@ -62,10 +65,6 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousInit() {
 		this._aTimer.start();
-		// myRobot.drive(0.5, 0.0); // drive 50% fwd 0% turn
-		// Timer.delay(2.0); // wait 2 seconds
-		// myRobot.drive(0.0, 0.75); // drive 0% fwd, 75% turn
-		// myRobot.drive(0.0, 0.0);
 		
 		this._gyro.reset();
 		
@@ -95,9 +94,11 @@ public class Robot extends IterativeRobot {
 	/**
 	 * This function is called once each time the robot enters tele-operated
 	 * mode
+	 * 
+	 * \
 	 */
 	public void teleopInit() { 
-		myRobot = new RobotDrive(4, 5, 6, 7);	
+			 
 	}
 	
 	/**
@@ -109,29 +110,43 @@ public class Robot extends IterativeRobot {
 		myRobot.tankDrive(left, right);
 
 		// This works!
-		// press and release for joystick trigger number 5 motor
-		while (right.getRawButton(1)) {
+		// press and release for joystick number 5 motor
+		// Using IF - ELSE IF - ELSE allows teleopPeriodic to continue looping
+		// (a WHILE loop would be stuck until the button was released)
+		if (right.getRawButton(3)) {
 			shooter.set(1.0);
 		}
-		while (left.getRawButton(1)) {
+		else if (right.getRawButton(2)) {
 			shooter.set(-1.0);
 		}
-		shooter.set(0.0);
+		else shooter.set(0.0);
 
-		if (left.getRawButton(10)) {
+		if (left.getRawButton(4)) { //fork pneumatics 
 			downLift.set(true);
 			upLift.set(false);
-		} else if (left.getRawButton(7)) {
+		} else if (left.getRawButton(5)) { 
 			downLift.set(false);
 			upLift.set(true);
 		}
-		if (left.getRawButton(11)) {
+		if (right.getRawButton(4)) { //ball lifting 
 			frontDownLift.set(true);
 			frontUpLift.set(false);
-		} else if (left.getRawButton(6)) {
+		} else if (right.getRawButton(5)) {
 			frontDownLift.set(false);
 			frontUpLift.set(true);
 		}
+		if (right.getRawButton(7)){
+			climber1.set(1.0);
+			climber2.set(1.0);
+	
+		} else if (right.getRawButton(8)){
+			climber1.set(-1.0);
+			climber2.set(-1.0);	
+		} else {
+			climber1.set(0);
+			climber2.set(0);
+		}
+		
 		// //if(left.getRawbutton(x)){
 		// Relay.set(Relay.Value.bForward);
 		// }
@@ -179,23 +194,23 @@ public class Robot extends IterativeRobot {
 		}else if(auto1State == Auto1State.FINISH) {
 			myRobot.tankDrive(0, 0);
 		}
-//		
-//		if (this._aTimer.get() >= 4.0) { // going straight and crossing low bar, 150,160(recent)
-//			myRobot.drive(0.4, 0.0);
-//			this._aTimer.reset();
-//    //		} else if (autoLoopCounter < 220) { // Turning 135 degrees after
-//	//										// crossing low bar to shoot,220
-//	//	myRobot.drive(0.475, 1.1635);
-////			autoLoopCounter++;
-////		} else if (autoLoopCounter < 300) { // 290
-////			myRobot.drive(-0.5, 0.0); // From 6in to 8in wheel factor =
-////										// .766798419
-////			autoLoopCounter++;
-////		} else {
-////			myRobot.drive(0.0, 0.0); // If the robot has reached 100 packets,
-////			shooter.set(1.0); // this line tells the robot to stop
-//
-//		}
+		
+		if (this._aTimer.get() >= 4.0) { // going straight and crossing low bar, 150,160(recent)
+			myRobot.drive(0.4, 0.0);
+			this._aTimer.reset();
+    		} else if (autoLoopCounter < 220) { // Turning 135 degrees after
+											// crossing low bar to shoot,220
+		myRobot.drive(0.475, 1.1635);
+			autoLoopCounter++;
+		} else if (autoLoopCounter < 300) { // 290
+			myRobot.drive(-0.5, 0.0); // From 6in to 8in wheel factor =
+										// .766798419
+			autoLoopCounter++;
+		} else {
+			myRobot.drive(0.0, 0.0); // If the robot has reached 100 packets,
+			shooter.set(1.0); // this line tells the robot to stop
+
+		}
 	}
 
 	
@@ -304,11 +319,12 @@ public class Robot extends IterativeRobot {
 	}
 	
 	private void updateDistance() {
-		this._velocity = this._accelerometer.getY() * this._eTimer.get();
-		this._displacement = this._velocity * this._eTimer.get();
+		this._velocity += this._accelerometer.getY() * this._eTimer.get();
+		this._displacement += this._velocity * this._eTimer.get();
+		this._eTimer.reset();
 	}
 	private double getDistance() {
-		return this._displacement;
+		return Math.abs(this._displacement);
 	}
 	private void resetDistance() {
 		this._velocity = 0.0;
