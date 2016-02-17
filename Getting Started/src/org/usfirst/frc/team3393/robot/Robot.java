@@ -173,6 +173,9 @@ public class Robot extends IterativeRobot {
 
 	enum Auto1State {
 		DRIVE_FORWARD,
+		CASTLE_TURN,
+		DRIVE_TO_CASTLE,
+		RELEASE_BALL,
 		FINISH
 	}
 	Auto1State auto1State = Auto1State.DRIVE_FORWARD;
@@ -180,37 +183,40 @@ public class Robot extends IterativeRobot {
 		if(auto1State == Auto1State.DRIVE_FORWARD) {
 			myRobot.tankDrive(0.4, 0.4);
 			
-			// Stop after 3 meters
-			if(this.getDistance() >= 3.0) {
-				this._aTimer.stop();
-				this._aTimer.reset();
-				this._aTimer.start();
+			// Stop after 8 feet in meters
+			if(this.getDistance() >= 2.4384) {
+				
 				
 				// Reset distance because we're turning in the next state
 				this.resetDistance();
 				
+				auto1State = Auto1State.CASTLE_TURN;
+			}
+		}else if(auto1State == Auto1State.CASTLE_TURN) {
+			myRobot.drive(0.475, 1.1635);
+			auto1State = Auto1State.DRIVE_TO_CASTLE;
+			this.resetDistance();
+		}else if (auto1State == Auto1State.DRIVE_TO_CASTLE) {
+			myRobot.tankDrive(0.4, 0.4);
+			if(this.getDistance() >= 4.8768){
+				this.resetDistance();
+				this._eTimer.reset();
+				auto1State = Auto1State.RELEASE_BALL;
+				
+				
+			}
+		} else if(auto1State == Auto1State.RELEASE_BALL) {
+			myRobot.tankDrive(0.0, 0.0);
+			shooter.set(1.0);
+			if (this._aTimer.get() >= 2.0) {
+				shooter.set(0.0);
 				auto1State = Auto1State.FINISH;
 			}
-		}else if(auto1State == Auto1State.FINISH) {
-			myRobot.tankDrive(0, 0);
+		} else if (auto1State == Auto1State.FINISH) {
+			System.out.print("IT'S OVER!");
 		}
 		
-		if (this._aTimer.get() >= 4.0) { // going straight and crossing low bar, 150,160(recent)
-			myRobot.drive(0.4, 0.0);
-			this._aTimer.reset();
-    		} else if (this._aTimer.get() >= 4.0) { // Turning 135 degrees after
-											// crossing low bar to shoot,220
-		myRobot.drive(0.475, 1.1635);
-		//	autoLoopCounter++;
-		} else if (this._aTimer.get() >= 4.0) { // 290
-			myRobot.drive(-0.5, 0.0); // From 6in to 8in wheel factor =
-										// .766798419
-		//	autoLoopCounter++;
-		} else {
-			myRobot.drive(0.0, 0.0); // If the robot has reached 100 packets,
-			shooter.set(1.0); // this line tells the robot to stop
 
-		}
 	}
 
 	
@@ -245,77 +251,20 @@ public class Robot extends IterativeRobot {
 	// turn 180
 	// drive 6 ft reach barior
 	enum Auto3State {
-		DRIVE_FORWARD_3,
-		BALL_PICKUP,
-		DRIVE_REVERSE,
-		TURN_AROUND,
+		DRIVE_REVERSE,  
 		FINISH
 	}
-	Auto3State auto3State = Auto3State.DRIVE_FORWARD_3;
+	Auto3State auto3State = Auto3State.DRIVE_REVERSE;
 	private void autonomous3() {
-		if(auto3State == Auto3State.DRIVE_FORWARD_3) {
+		if(auto3State == Auto3State.DRIVE_REVERSE) {
 			myRobot.tankDrive(-0.25, -0.25);
-			
-			if(this._aTimer.get() >= 1.0) {
-				this._aTimer.stop();
-				this._aTimer.reset();
-				this._aTimer.start();
-				
-				auto3State = Auto3State.BALL_PICKUP;
-			}
-		}else if(auto3State == Auto3State.BALL_PICKUP) {
-			// Pick up ball
-			
-			if(this._aTimer.get() >= 1.0) {
-				this._aTimer.stop();
-				this._aTimer.reset();
-				this._aTimer.start();
-				
-				auto3State = Auto3State.DRIVE_REVERSE;
-			}
-		}else if(auto3State == Auto3State.DRIVE_REVERSE) {
-			myRobot.tankDrive(0.4, 0.4);
-			
-			if(this._aTimer.get() >= 2.0) {
-				this._aTimer.stop();
-				this._aTimer.reset();
-				this._aTimer.start();
-				
-				auto3State = Auto3State.TURN_AROUND;
-			}
-		}else if(auto3State == Auto3State.TURN_AROUND) {
-			myRobot.tankDrive(0.5, -0.5);
-			
-			if(this._gyro.getAngle() >= 180) {
-				this._aTimer.stop();
-				this._aTimer.reset();
-				this._aTimer.start();
-				
-				this._gyro.reset();
+			if(this.getDistance() >= 2.4384) {
 				
 				auto3State = Auto3State.FINISH;
 			}
 		}else if(auto3State == Auto3State.FINISH) {
-			myRobot.tankDrive(0, 0);
+			myRobot.tankDrive(0,0);
 		}
-		
-//		// move one foot forward
-//		if (this._aTimer.get() <= 4.0) {
-//			myRobot.drive(-0.25, 0.0);
-//		} else if (this._aTimer.get() <= 6.0) {
-//			// pick up ball
-//
-//			Timer.delay(1);
-//		} else if (this._aTimer.get() <= 8.0) {
-//			myRobot.drive(0.4, 0.0);
-//			// move 5 feet reverse
-//		} else if (this._aTimer.get() <= 10.0) {
-//			// turn 180
-//			myRobot.drive(0.445, 1.2); // Turn is 1.2 Drive is 0.445
-//
-//		} else {
-//			myRobot.drive(0.0, 0.0);
-//		}
 	}
 	
 	private void updateDistance() {
