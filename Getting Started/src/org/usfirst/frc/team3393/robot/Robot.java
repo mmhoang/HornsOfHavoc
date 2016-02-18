@@ -180,27 +180,35 @@ public class Robot extends IterativeRobot {
 	}
 	Auto1State auto1State = Auto1State.DRIVE_FORWARD;
 	private void autonomous1() {
-		if(auto1State == Auto1State.DRIVE_FORWARD) {
-			myRobot.tankDrive(0.4, 0.4);
+		if(auto1State == Auto1State.DRIVE_FORWARD) { 
+			myRobot.tankDrive(0.6, 0.6);
+			downLift.set(true);//Splatalorx
+			upLift.set(false);
+			frontDownLift.set(false);//front
+			frontUpLift.set(true);
+			System.out.println("Distance" + this.getDistance());
 			
 			// Stop after 8 feet in meters
-			if(this.getDistance() >= 2.4384) {
-				
-				
+			if(this.getDistance() >= 3.7) { //2.4384, 2,, 3.6576
 				// Reset distance because we're turning in the next state
-				this.resetDistance();
-				
+				//this.resetDistance();
+				this._aTimer.reset();
 				auto1State = Auto1State.CASTLE_TURN;
 			}
 		}else if(auto1State == Auto1State.CASTLE_TURN) {
-			myRobot.drive(0.475, 1.1635);
-			auto1State = Auto1State.DRIVE_TO_CASTLE;
-			this.resetDistance();
-		}else if (auto1State == Auto1State.DRIVE_TO_CASTLE) {
-			myRobot.tankDrive(0.4, 0.4);
-			if(this.getDistance() >= 4.8768){
+			myRobot.tankDrive(0.1,0.85);		//0.1,0.4
+			System.out.println("castle"+this._aTimer.get());
+			if(this._aTimer.get() >=1.5){
+				auto1State = Auto1State.DRIVE_TO_CASTLE;
 				this.resetDistance();
-				this._eTimer.reset();
+			}
+		
+		}else if (auto1State == Auto1State.DRIVE_TO_CASTLE) {
+			myRobot.tankDrive(-0.6, -0.6);
+			System.out.println("drivetocastle"+this.getDistance());
+			if(this.getDistance() >= 1.0){
+				this.resetDistance();
+				this._aTimer.reset();
 				auto1State = Auto1State.RELEASE_BALL;
 				
 				
@@ -273,7 +281,7 @@ public class Robot extends IterativeRobot {
 		this._eTimer.reset();
 	}
 	private double getDistance() {
-		return Math.abs(this._displacement);
+		return Math.abs(this._displacement) * 10;
 	}
 	private void resetDistance() {
 		this._velocity = 0.0;
