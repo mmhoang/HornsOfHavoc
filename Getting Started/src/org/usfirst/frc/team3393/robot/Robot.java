@@ -25,12 +25,9 @@ public class Robot extends IterativeRobot {
 	Victor climber2;
 	Timer _aTimer;
 	Accelerometer _accelerometer;
+	EulerDistanceEstimator _distanceEstimator;
 
 	AnalogGyro _gyro;
-
-	double _velocity;
-	double _displacement;
-	Timer _eTimer;
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -52,12 +49,9 @@ public class Robot extends IterativeRobot {
 
 		this._aTimer = new Timer();
 		this._accelerometer = new BuiltInAccelerometer();
+		this._distanceEstimator = new EulerDistanceEstimator(this._accelerometer);
 
 		this._gyro = new AnalogGyro(0);
-
-		this._velocity = 0;
-		this._displacement = 0;
-		this._eTimer = new Timer();
 
 	}
 
@@ -69,16 +63,14 @@ public class Robot extends IterativeRobot {
 
 		this._gyro.reset();
 
-		this.resetDistance();
-
-		this._eTimer.start();
+		this._distanceEstimator.reset();
 	}
 
 	/**
 	 * This function is called periodically during autonomous
 	 */
 	public void autonomousPeriodic() {
-		this.updateDistance();
+		this._distanceEstimator.update();
 
 		if (toggle == 1) {
 			autonomous1();
@@ -106,7 +98,7 @@ public class Robot extends IterativeRobot {
 	 * This function is called periodically during operator control
 	 */
 	public void teleopPeriodic() {
-		this.updateDistance();
+		this._distanceEstimator.update();
 
 		myRobot.tankDrive(left, right);
 
@@ -184,12 +176,12 @@ public class Robot extends IterativeRobot {
 			upLift.set(false);
 			frontDownLift.set(false);// front
 			frontUpLift.set(true);
-			System.out.println("Distance" + this.getDistance());
+			System.out.println("Distance" + this._distanceEstimator.getDistance());
 
 			// Stop after 8 feet in meters
-			if (this.getDistance() >= 3.7) { // 2.4384, 2,, 3.6576
+			if (this._distanceEstimator.getDistance() >= 3.7) { // 2.4384, 2,, 3.6576
 				// Reset distance because we're turning in the next state
-				// this.resetDistance();
+				// this._positionEstimator.reset();
 				this._aTimer.reset();
 				auto1State = Auto1State.CASTLE_TURN;
 			}
@@ -198,14 +190,14 @@ public class Robot extends IterativeRobot {
 			System.out.println("castle" + this._aTimer.get());
 			if (this._aTimer.get() >= 1.5) {
 				auto1State = Auto1State.DRIVE_TO_CASTLE;
-				this.resetDistance();
+				this._distanceEstimator.reset();
 			}
 
 		} else if (auto1State == Auto1State.DRIVE_TO_CASTLE) {
 			myRobot.tankDrive(-0.6, -0.6);
-			System.out.println("drivetocastle" + this.getDistance());
-			if (this.getDistance() >= 1.0) {
-				this.resetDistance();
+			System.out.println("drivetocastle" + this._distanceEstimator.getDistance());
+			if (this._distanceEstimator.getDistance() >= 1.0) {
+				this._distanceEstimator.reset();
 				this._aTimer.reset();
 				auto1State = Auto1State.RELEASE_BALL;
 
@@ -236,8 +228,8 @@ public class Robot extends IterativeRobot {
 			upLift.set(false);
 			frontDownLift.set(false);// front
 			frontUpLift.set(true);
-			System.out.println("Distance" + this.getDistance());
-			if (this.getDistance() >= 3.7) { // 2.4384, 2,, 3.6576
+			System.out.println("Distance" + this._distanceEstimator.getDistance());
+			if (this._distanceEstimator.getDistance() >= 3.7) { // 2.4384, 2,, 3.6576
 				this._aTimer.reset();
 				auto2State = Auto2State.CASTLE_TURN;
 			}
@@ -246,7 +238,7 @@ public class Robot extends IterativeRobot {
 			System.out.println("castle" + this._aTimer.get());
 			if (this._aTimer.get() >= 1.5) {
 				auto2State = Auto2State.RELEASE_BALL;
-				this.resetDistance();
+				this._distanceEstimator.reset();
 				this._aTimer.reset();
 			}
 		} else if (auto2State == Auto2State.RELEASE_BALL) {
@@ -262,13 +254,13 @@ public class Robot extends IterativeRobot {
 			System.out.println("castle turn back" + this._aTimer.get());
 			if (this._aTimer.get() >= 0.71) {
 				auto2State = Auto2State.RECROSS_BARRIER;
-				this.resetDistance();
+				this._distanceEstimator.reset();
 				this._aTimer.reset();
 			}
 		} else if (auto2State == Auto2State.RECROSS_BARRIER) {
 			myRobot.tankDrive(0.7, 0.7);
-			System.out.println("Distance" + this.getDistance());
-			if (this.getDistance() >= 2.0) { // 3.7, 2.4384, 2,, 3.6576
+			System.out.println("Distance" + this._distanceEstimator.getDistance());
+			if (this._distanceEstimator.getDistance() >= 2.0) { // 3.7, 2.4384, 2,, 3.6576
 				auto2State = Auto2State.FINISH;
 
 			}
@@ -293,7 +285,7 @@ public class Robot extends IterativeRobot {
 	private void autonomous3() {
 		if (auto3State == Auto3State.DRIVE_REVERSE) {
 			myRobot.tankDrive(-0.25, -0.25);
-			if (this.getDistance() >= 2.4384) {
+			if (this._distanceEstimator.getDistance() >= 2.4384) {
 
 				auto3State = Auto3State.FINISH;
 			}
@@ -302,18 +294,4 @@ public class Robot extends IterativeRobot {
 		}
 	}
 
-	private void updateDistance() {
-		this._velocity += this._accelerometer.getY() * this._eTimer.get();
-		this._displacement += this._velocity * this._eTimer.get();
-		this._eTimer.reset();
-	}
-
-	private double getDistance() {
-		return Math.abs(this._displacement) * 10;
-	}
-
-	private void resetDistance() {
-		this._velocity = 0.0;
-		this._displacement = 0.0;
-	}
 }
