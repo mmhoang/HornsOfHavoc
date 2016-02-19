@@ -25,7 +25,7 @@ public class Robot extends IterativeRobot {
 	Victor climber2;
 	Timer _aTimer;
 	Accelerometer _accelerometer;
-	EulerPositionEstimator _distanceEstimator;
+	EulerDistanceEstimator _distanceEstimator;
 
 	AnalogGyro _gyro;
 
@@ -49,7 +49,7 @@ public class Robot extends IterativeRobot {
 
 		this._aTimer = new Timer();
 		this._accelerometer = new BuiltInAccelerometer();
-		this._distanceEstimator = new EulerPositionEstimator(this._accelerometer);
+		this._distanceEstimator = new EulerDistanceEstimator(this._accelerometer);
 
 		this._gyro = new AnalogGyro(0);
 

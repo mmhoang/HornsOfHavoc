@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.interfaces.Accelerometer;
  * @author pjrader1
  *
  */
-public class EulerPositionEstimator {
+public class EulerDistanceEstimator {
 	
 	private Accelerometer _accelSensor;
 	
@@ -20,10 +20,10 @@ public class EulerPositionEstimator {
 	private Timer _eTimer;
 	
 	/**
-	 * Constructs a EulerPositionEstimator.
+	 * Constructs a EulerDistanceEstimator.
 	 * @param accelerometer The accelerometer objects that is used to approximate
 	 */
-	public EulerPositionEstimator(Accelerometer accelerometer) {
+	public EulerDistanceEstimator(Accelerometer accelerometer) {
 		this._accelSensor = accelerometer;
 		
 		this._eTimer = new Timer();
