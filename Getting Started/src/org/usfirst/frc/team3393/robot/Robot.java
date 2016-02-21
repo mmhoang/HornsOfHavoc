@@ -1,11 +1,15 @@
 package org.usfirst.frc.team3393.robot;
 
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 // ******* After initializing the SendableChooser, configs will show up in the
 // SmartDashboard (with the driver station) ********
 //import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -15,6 +19,9 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
  * directory.
  */
 public class Robot extends IterativeRobot {
+	Command autonomousCommand;
+	SendableChooser autoChooser;
+	
 	RobotDrive myRobot;
 	Joystick left, right, control;
 	Solenoid downLift, upLift;
@@ -27,7 +34,7 @@ public class Robot extends IterativeRobot {
 	Accelerometer _accelerometer;
 
 	AnalogGyro _gyro;
-
+	double Kp = 0.03;
 	double _velocity;
 	double _displacement;
 	Timer _eTimer;
@@ -37,7 +44,12 @@ public class Robot extends IterativeRobot {
 	 * used for any initialization code.
 	 */
 	public void robotInit() {
-		toggle = 2;
+		autoChooser = new SendableChooser();
+		autoChooser.addDefault("Autonomous 1", "autonomous1");
+		autoChooser.addObject("Autonomous 2", "autonomous2");
+		autoChooser.addObject("Autonomous 3", "autonomous3");
+		SmartDashboard.putData("Autonomous Modes", autoChooser);
+		toggle = 3;
 		shooter = new Victor(6);
 		climber1 = new Victor(4);
 		climber2 = new Victor(5);
@@ -65,12 +77,17 @@ public class Robot extends IterativeRobot {
 	 * This function is run once each time the robot enters autonomous mode
 	 */
 	public void autonomousInit() {
+		/*autonomousCommand = (Command)autoChooser.getSelected();
+		autonomousCommand.start();*/
+		this._aTimer.stop();
+		//this._aTimer.reset();
 		this._aTimer.start();
 
 		this._gyro.reset();
 
 		this.resetDistance();
-
+        this._eTimer.stop();
+        //this._eTimer.reset();
 		this._eTimer.start();
 	}
 
@@ -78,18 +95,30 @@ public class Robot extends IterativeRobot {
 	 * This function is called periodically during autonomous
 	 */
 	public void autonomousPeriodic() {
+		Scheduler.getInstance().run();
 		this.updateDistance();
-
-		if (toggle == 1) {
+		String autoOption = autoChooser.getSelected().toString();
+        
+		if (autoOption.equals("autonomous1")) {
+			autonomous1();
+		} else if (autoOption.equals("autonomous2")) {
+			autonomous2();
+		} else if (autoOption.equals("autonomous3")) {
+			autonomous3();
+		} else {
+			// This is an error condition
+			System.out.print("No autonomous mode here.");
+		}
+		/*if (toggle == 1) {
 			autonomous1();
 		} else if (toggle == 2) {
 			autonomous2();
 		} else if (toggle == 3) {
 			autonomous3();
 		} else {
-			// This is an error condition
+			 //This is an error condition
 			System.out.print("No autonomous mode here.");
-		}
+		}*/
 	}
 
 	/**
@@ -170,7 +199,6 @@ public class Robot extends IterativeRobot {
 	public void testPeriodic() {
 		LiveWindow.run();
 	}
-
 	enum Auto1State {
 		DRIVE_FORWARD, CASTLE_TURN, DRIVE_TO_CASTLE, RELEASE_BALL, FINISH
 	}
@@ -179,22 +207,31 @@ public class Robot extends IterativeRobot {
 
 	private void autonomous1() {
 		if (auto1State == Auto1State.DRIVE_FORWARD) {
-			myRobot.tankDrive(0.6, 0.6);
-			downLift.set(true);// Splatalorx
+			//double angle = _gyro.getAngle();
+			//System.out.println("Angle" + angle);
+			//myRobot.drive(0.6, -angle*Kp);
+			myRobot.tankDrive(0.7, 0.7);
+			downLift.set(true);// Spatulorx
 			upLift.set(false);
 			frontDownLift.set(false);// front
 			frontUpLift.set(true);
-			System.out.println("Distance" + this.getDistance());
+			//System.out.println("Distance" + this.getDistance());
 
 			// Stop after 8 feet in meters
-			if (this.getDistance() >= 3.7) { // 2.4384, 2,, 3.6576
+			if (this.getDistance() >= 4.2) { // 3.7 2.4384, 2,, 3.6576, 4.877=16 feet
 				// Reset distance because we're turning in the next state
 				// this.resetDistance();
 				this._aTimer.reset();
+				
 				auto1State = Auto1State.CASTLE_TURN;
 			}
 		} else if (auto1State == Auto1State.CASTLE_TURN) {
-			myRobot.tankDrive(0.1, 0.85); // 0.1,0.4
+			//double turnAngle = this._gyro.getAngle() + 135.0;
+			//System.out.println("turnAngle" + _gyro.getAngle());
+			//this._gyro.reset();
+			//while (_gyro.getAngle() <= 135.0){
+			myRobot.tankDrive(0.6, -0.6); // 0.1, 0.85
+			//}
 			System.out.println("castle" + this._aTimer.get());
 			if (this._aTimer.get() >= 1.5) {
 				auto1State = Auto1State.DRIVE_TO_CASTLE;
@@ -204,7 +241,7 @@ public class Robot extends IterativeRobot {
 		} else if (auto1State == Auto1State.DRIVE_TO_CASTLE) {
 			myRobot.tankDrive(-0.6, -0.6);
 			System.out.println("drivetocastle" + this.getDistance());
-			if (this.getDistance() >= 1.0) {
+			if (this.getDistance() >= 3.3) {
 				this.resetDistance();
 				this._aTimer.reset();
 				auto1State = Auto1State.RELEASE_BALL;
@@ -237,7 +274,7 @@ public class Robot extends IterativeRobot {
 			frontDownLift.set(false);// front
 			frontUpLift.set(true);
 			System.out.println("Distance" + this.getDistance());
-			if (this.getDistance() >= 3.7) { // 2.4384, 2,, 3.6576
+			if (this.getDistance() >= 4.2) { // 2.4384, 2,, 3.6576
 				this._aTimer.reset();
 				auto2State = Auto2State.CASTLE_TURN;
 			}
@@ -292,8 +329,8 @@ public class Robot extends IterativeRobot {
 
 	private void autonomous3() {
 		if (auto3State == Auto3State.DRIVE_REVERSE) {
-			myRobot.tankDrive(-0.25, -0.25);
-			if (this.getDistance() >= 2.4384) {
+			myRobot.tankDrive(-0.9, -0.9);
+			if (this.getDistance() >= 5.1) {
 
 				auto3State = Auto3State.FINISH;
 			}
