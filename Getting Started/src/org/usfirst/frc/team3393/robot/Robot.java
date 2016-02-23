@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends IterativeRobot {
 	Command autonomousCommand;
 	SendableChooser autoChooser;
-	
+
 	RobotDrive myRobot;
 	Joystick left, right, control;
 	Solenoid downLift, upLift;
@@ -44,6 +44,11 @@ public class Robot extends IterativeRobot {
 	 * used for any initialization code.
 	 */
 	public void robotInit() {
+		CameraServer server = CameraServer.getInstance();
+		server.setQuality(100); //50
+		server.startAutomaticCapture("cam0");
+		
+
 		autoChooser = new SendableChooser();
 		autoChooser.addDefault("Autonomous 1", "autonomous1");
 		autoChooser.addObject("Autonomous 2", "autonomous2");
@@ -77,17 +82,19 @@ public class Robot extends IterativeRobot {
 	 * This function is run once each time the robot enters autonomous mode
 	 */
 	public void autonomousInit() {
-		/*autonomousCommand = (Command)autoChooser.getSelected();
-		autonomousCommand.start();*/
+		/*
+		 * autonomousCommand = (Command)autoChooser.getSelected();
+		 * autonomousCommand.start();
+		 */
 		this._aTimer.stop();
-		//this._aTimer.reset();
+		// this._aTimer.reset();
 		this._aTimer.start();
 
 		this._gyro.reset();
 
 		this.resetDistance();
-        this._eTimer.stop();
-        //this._eTimer.reset();
+		this._eTimer.stop();
+		// this._eTimer.reset();
 		this._eTimer.start();
 	}
 
@@ -98,7 +105,7 @@ public class Robot extends IterativeRobot {
 		Scheduler.getInstance().run();
 		this.updateDistance();
 		String autoOption = autoChooser.getSelected().toString();
-        
+
 		if (autoOption.equals("autonomous1")) {
 			autonomous1();
 		} else if (autoOption.equals("autonomous2")) {
@@ -109,16 +116,12 @@ public class Robot extends IterativeRobot {
 			// This is an error condition
 			System.out.print("No autonomous mode here.");
 		}
-		/*if (toggle == 1) {
-			autonomous1();
-		} else if (toggle == 2) {
-			autonomous2();
-		} else if (toggle == 3) {
-			autonomous3();
-		} else {
-			 //This is an error condition
-			System.out.print("No autonomous mode here.");
-		}*/
+		/*
+		 * if (toggle == 1) { autonomous1(); } else if (toggle == 2) {
+		 * autonomous2(); } else if (toggle == 3) { autonomous3(); } else {
+		 * //This is an error condition System.out.print(
+		 * "No autonomous mode here."); }
+		 */
 	}
 
 	/**
@@ -143,9 +146,9 @@ public class Robot extends IterativeRobot {
 		// press and release for joystick number 5 motor
 		// Using IF - ELSE IF - ELSE allows teleopPeriodic to continue looping
 		// (a WHILE loop would be stuck until the button was released)
-		if (right.getRawButton(3)) {
+		if (right.getRawButton(2)) { // Ball grabbers
 			shooter.set(1.0);
-		} else if (right.getRawButton(2)) {
+		} else if (right.getRawButton(3)) {
 			shooter.set(-1.0);
 		} else
 			shooter.set(0.0);
@@ -176,21 +179,6 @@ public class Robot extends IterativeRobot {
 			climber2.set(0);
 		}
 
-		// //if(left.getRawbutton(x)){
-		// Relay.set(Relay.Value.bForward);
-		// }
-		// else if (left.getRawButton(x));{
-		// Relay.set(Relay.Value.bReverse);
-		// }
-		// else{
-		// Relay.setDefaultSolenoidModule(Relay.Value.koff);
-		// }
-		// if(left.getRawButton(x));{
-		// dsolenoid.set(Relay.Value.bReverse);
-		// }
-		// else if(left.getRawButton(x)){
-		// dsolenoid.set(DoubleSolenoid.Value.kForward);
-		// }
 	}
 
 	/**
@@ -199,6 +187,7 @@ public class Robot extends IterativeRobot {
 	public void testPeriodic() {
 		LiveWindow.run();
 	}
+
 	enum Auto1State {
 		DRIVE_FORWARD, CASTLE_TURN, DRIVE_TO_CASTLE, RELEASE_BALL, FINISH
 	}
@@ -207,31 +196,32 @@ public class Robot extends IterativeRobot {
 
 	private void autonomous1() {
 		if (auto1State == Auto1State.DRIVE_FORWARD) {
-			//double angle = _gyro.getAngle();
-			//System.out.println("Angle" + angle);
-			//myRobot.drive(0.6, -angle*Kp);
+			// double angle = _gyro.getAngle();
+			// System.out.println("Angle" + angle);
+			// myRobot.drive(0.6, -angle*Kp);
 			myRobot.tankDrive(0.7, 0.7);
 			downLift.set(true);// Spatulorx
 			upLift.set(false);
 			frontDownLift.set(false);// front
 			frontUpLift.set(true);
-			//System.out.println("Distance" + this.getDistance());
+			// System.out.println("Distance" + this.getDistance());
 
 			// Stop after 8 feet in meters
-			if (this.getDistance() >= 4.2) { // 3.7 2.4384, 2,, 3.6576, 4.877=16 feet
+			if (this.getDistance() >= 4.2) { // 3.7 2.4384, 2,, 3.6576, 4.877=16
+												// feet
 				// Reset distance because we're turning in the next state
 				// this.resetDistance();
 				this._aTimer.reset();
-				
+
 				auto1State = Auto1State.CASTLE_TURN;
 			}
 		} else if (auto1State == Auto1State.CASTLE_TURN) {
-			//double turnAngle = this._gyro.getAngle() + 135.0;
-			//System.out.println("turnAngle" + _gyro.getAngle());
-			//this._gyro.reset();
-			//while (_gyro.getAngle() <= 135.0){
+			// double turnAngle = this._gyro.getAngle() + 135.0;
+			// System.out.println("turnAngle" + _gyro.getAngle());
+			// this._gyro.reset();
+			// while (_gyro.getAngle() <= 135.0){
 			myRobot.tankDrive(0.6, -0.6); // 0.1, 0.85
-			//}
+			// }
 			System.out.println("castle" + this._aTimer.get());
 			if (this._aTimer.get() >= 1.5) {
 				auto1State = Auto1State.DRIVE_TO_CASTLE;
@@ -279,7 +269,7 @@ public class Robot extends IterativeRobot {
 				auto2State = Auto2State.CASTLE_TURN;
 			}
 		} else if (auto2State == Auto2State.CASTLE_TURN) {
-			myRobot.tankDrive(0.6, -0.6); 
+			myRobot.tankDrive(0.6, -0.6);
 			System.out.println("castle" + this._aTimer.get());
 			if (this._aTimer.get() >= 1.5) {
 				auto2State = Auto2State.RELEASE_BALL;
@@ -295,7 +285,7 @@ public class Robot extends IterativeRobot {
 				auto2State = Auto2State.CASTLE_TURNBACK;
 			}
 		} else if (auto2State == Auto2State.CASTLE_TURNBACK) {
-			myRobot.tankDrive(0.62, -0.62); 
+			myRobot.tankDrive(0.62, -0.62);
 			System.out.println("castle turn back" + this._aTimer.get());
 			if (this._aTimer.get() >= 0.71) {
 				auto2State = Auto2State.RECROSS_BARRIER;
@@ -316,11 +306,6 @@ public class Robot extends IterativeRobot {
 		}
 	}
 
-	// move one foot forword
-	// pick up ball
-	// move 5 feet reverse
-	// turn 180
-	// drive 6 ft reach barior
 	enum Auto3State {
 		DRIVE_REVERSE, FINISH
 	}
