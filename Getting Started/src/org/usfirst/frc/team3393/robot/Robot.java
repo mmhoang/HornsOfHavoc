@@ -50,9 +50,9 @@ public class Robot extends IterativeRobot {
 		
 
 		autoChooser = new SendableChooser();
-		autoChooser.addDefault("Autonomous 1", "autonomous1");
-		autoChooser.addObject("Autonomous 2", "autonomous2");
-		autoChooser.addObject("Autonomous 3", "autonomous3");
+		autoChooser.addDefault("Autonomous 1: Drive REVERSE over low bar, turn, drive forward, shoot", "autonomous1");
+		autoChooser.addObject("Autonomous 2: Drive REVERSE over low bar, stop", "autonomous2");
+		autoChooser.addObject("Autonomous 3: Driver FORWARD over rough terrain, stop", "autonomous3");
 		SmartDashboard.putData("Autonomous Modes", autoChooser);
 		toggle = 3;
 		shooter = new Victor(6);
@@ -189,13 +189,13 @@ public class Robot extends IterativeRobot {
 	}
 
 	enum Auto1State {
-		DRIVE_FORWARD, CASTLE_TURN, DRIVE_TO_CASTLE, RELEASE_BALL, FINISH
+		DRIVE_REVERSE, CASTLE_TURN, DRIVE_TO_CASTLE, RELEASE_BALL, FINISH
 	}
 
-	Auto1State auto1State = Auto1State.DRIVE_FORWARD;
+	Auto1State auto1State = Auto1State.DRIVE_REVERSE;
 
 	private void autonomous1() {
-		if (auto1State == Auto1State.DRIVE_FORWARD) {
+		if (auto1State == Auto1State.DRIVE_REVERSE) {
 			// double angle = _gyro.getAngle();
 			// System.out.println("Angle" + angle);
 			// myRobot.drive(0.6, -angle*Kp);
@@ -251,7 +251,7 @@ public class Robot extends IterativeRobot {
 	}
 
 	enum Auto2State {
-		DRIVE_REVERSE, CASTLE_TURN, RELEASE_BALL, CASTLE_TURNBACK, RECROSS_BARRIER, FINISH
+		DRIVE_REVERSE, FINISH
 	}
 
 	Auto2State auto2State = Auto2State.DRIVE_REVERSE;
@@ -259,61 +259,27 @@ public class Robot extends IterativeRobot {
 	private void autonomous2() {
 		if (auto2State == Auto2State.DRIVE_REVERSE) {
 			myRobot.tankDrive(0.7, 0.7);
-			downLift.set(true);// Splatalorx
+			downLift.set(true);// Spatulorx
 			upLift.set(false);
 			frontDownLift.set(false);// front
 			frontUpLift.set(true);
-			System.out.println("Distance" + this.getDistance());
-			if (this.getDistance() >= 4.2) { // 2.4384, 2,, 3.6576
-				this._aTimer.reset();
-				auto2State = Auto2State.CASTLE_TURN;
-			}
-		} else if (auto2State == Auto2State.CASTLE_TURN) {
-			myRobot.tankDrive(0.6, -0.6);
-			System.out.println("castle" + this._aTimer.get());
-			if (this._aTimer.get() >= 1.5) {
-				auto2State = Auto2State.RELEASE_BALL;
-				this.resetDistance();
-				this._aTimer.reset();
-			}
-		} else if (auto2State == Auto2State.RELEASE_BALL) {
-			myRobot.tankDrive(0.0, 0.0);
-			shooter.set(1.0);
-			if (this._aTimer.get() >= 1.5) {
-				shooter.set(0.0);
-				this._aTimer.reset();
-				auto2State = Auto2State.CASTLE_TURNBACK;
-			}
-		} else if (auto2State == Auto2State.CASTLE_TURNBACK) {
-			myRobot.tankDrive(0.62, -0.62);
-			System.out.println("castle turn back" + this._aTimer.get());
-			if (this._aTimer.get() >= 0.71) {
-				auto2State = Auto2State.RECROSS_BARRIER;
-				this.resetDistance();
-				this._aTimer.reset();
-			}
-		} else if (auto2State == Auto2State.RECROSS_BARRIER) {
-			myRobot.tankDrive(0.7, 0.7);
-			System.out.println("Distance" + this.getDistance());
-			if (this.getDistance() >= 2.0) { // 3.7, 2.4384, 2,, 3.6576
+			if (this.getDistance() >= 4.2) {
+
 				auto2State = Auto2State.FINISH;
-
 			}
-
 		} else if (auto2State == Auto2State.FINISH) {
-			myRobot.tankDrive(0.0, 0.0);
-			System.out.print("IT'S OVER!");
+			myRobot.tankDrive(0, 0);
 		}
 	}
 
 	enum Auto3State {
-		DRIVE_REVERSE, FINISH
+		DRIVE_FORWARD, FINISH
 	}
 
-	Auto3State auto3State = Auto3State.DRIVE_REVERSE;
+	Auto3State auto3State = Auto3State.DRIVE_FORWARD;
 
 	private void autonomous3() {
-		if (auto3State == Auto3State.DRIVE_REVERSE) {
+		if (auto3State == Auto3State.DRIVE_FORWARD) {
 			myRobot.tankDrive(-0.9, -0.9);
 			if (this.getDistance() >= 5.1) {
 
