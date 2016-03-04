@@ -45,7 +45,7 @@ public class Robot extends IterativeRobot {
 	 */
 	public void robotInit() {
 		CameraServer server = CameraServer.getInstance();
-		server.setQuality(100); //50
+		server.setQuality(50); //50
 		server.startAutomaticCapture("cam0");
 		
 
@@ -87,14 +87,14 @@ public class Robot extends IterativeRobot {
 		 * autonomousCommand.start();
 		 */
 		this._aTimer.stop();
-		// this._aTimer.reset();
+		this._aTimer.reset();
 		this._aTimer.start();
 
 		this._gyro.reset();
 
 		this.resetDistance();
 		this._eTimer.stop();
-		// this._eTimer.reset();
+		this._eTimer.reset();
 		this._eTimer.start();
 	}
 
@@ -168,12 +168,12 @@ public class Robot extends IterativeRobot {
 			frontUpLift.set(true);
 		}
 		if (right.getRawButton(7)) {
-			climber1.set(1.0);
-			climber2.set(1.0);
+			climber1.set(0.3);
+			climber2.set(0.3);
 
 		} else if (right.getRawButton(8)) {
-			climber1.set(-1.0);
-			climber2.set(-1.0);
+			climber1.set(-0.8);
+			climber2.set(-0.8);
 		} else {
 			climber1.set(0);
 			climber2.set(0);
@@ -220,10 +220,10 @@ public class Robot extends IterativeRobot {
 			// System.out.println("turnAngle" + _gyro.getAngle());
 			// this._gyro.reset();
 			// while (_gyro.getAngle() <= 135.0){
-			myRobot.tankDrive(0.6, -0.6); // 0.1, 0.85
+			myRobot.tankDrive(0.6, -0.6); // (0.6, -0.6) 0.1, 0.85
 			// }
 			System.out.println("castle" + this._aTimer.get());
-			if (this._aTimer.get() >= 1.5) {
+			if (this._aTimer.get() >= 1.6) {
 				auto1State = Auto1State.DRIVE_TO_CASTLE;
 				this.resetDistance();
 			}
@@ -239,7 +239,7 @@ public class Robot extends IterativeRobot {
 			}
 		} else if (auto1State == Auto1State.RELEASE_BALL) {
 			myRobot.tankDrive(0.0, 0.0);
-			shooter.set(1.0);
+			shooter.set(-1.0);
 			if (this._aTimer.get() >= 2.0) {
 				shooter.set(0.0);
 				auto1State = Auto1State.FINISH;
