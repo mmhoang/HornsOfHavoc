@@ -258,11 +258,11 @@ public class Robot extends IterativeRobot {
 
 	private void autonomous2() {
 		if (auto2State == Auto2State.DRIVE_REVERSE) {
-			myRobot.tankDrive(0.7, 0.7);
 			downLift.set(true);// Spatulorx
 			upLift.set(false);
 			frontDownLift.set(false);// front
 			frontUpLift.set(true);
+			myRobot.tankDrive(0.7, 0.7);
 			if (this.getDistance() >= 4.2) {
 
 				auto2State = Auto2State.FINISH;
