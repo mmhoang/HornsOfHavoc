@@ -38,7 +38,10 @@ public class Robot extends IterativeRobot {
 	double _velocity;
 	double _displacement;
 	Timer _eTimer;
-
+	boolean SPATULORX_DOWN = false;
+	boolean SPATULORX_UP = true;
+	double CLIMBING_SPEED_RELEASE = 0.3;
+	double CLIMBING_SPEED_RETURN = -0.8;
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -116,12 +119,6 @@ public class Robot extends IterativeRobot {
 			// This is an error condition
 			System.out.print("No autonomous mode here.");
 		}
-		/*
-		 * if (toggle == 1) { autonomous1(); } else if (toggle == 2) {
-		 * autonomous2(); } else if (toggle == 3) { autonomous3(); } else {
-		 * //This is an error condition System.out.print(
-		 * "No autonomous mode here."); }
-		 */
 	}
 
 	/**
@@ -154,29 +151,17 @@ public class Robot extends IterativeRobot {
 			shooter.set(0.0);
 
 		if (left.getRawButton(4)) { // fork pneumatics
-			downLift.set(true);
-			upLift.set(false);
+			setSpatulorx(SPATULORX_DOWN);
 		} else if (left.getRawButton(5)) {
-			downLift.set(false);
-			upLift.set(true);
-		}
-		if (right.getRawButton(4)) { // ball lifting
-			frontDownLift.set(true);
-			frontUpLift.set(false);
-		} else if (right.getRawButton(5)) {
-			frontDownLift.set(false);
-			frontUpLift.set(true);
-		}
+			setSpatulorx(SPATULORX_UP);
+		}  
+		
 		if (right.getRawButton(7)) {
-			climber1.set(0.3);
-			climber2.set(0.3);
-
-		} else if (right.getRawButton(8)) {
-			climber1.set(-0.8);
-			climber2.set(-0.8);
+			setClimbing(CLIMBING_SPEED_RELEASE);
+		} else if (right.getRawButton(8)) {	
+			setClimbing(CLIMBING_SPEED_RETURN);
 		} else {
-			climber1.set(0);
-			climber2.set(0);
+			setClimbing(0);	
 		}
 
 	}
@@ -196,16 +181,10 @@ public class Robot extends IterativeRobot {
 
 	private void autonomous1() {
 		if (auto1State == Auto1State.DRIVE_REVERSE) {
-			// double angle = _gyro.getAngle();
-			// System.out.println("Angle" + angle);
-			// myRobot.drive(0.6, -angle*Kp);
 			myRobot.tankDrive(0.7, 0.7);
-			downLift.set(true);// Spatulorx
-			upLift.set(false);
+			setSpatulorx(SPATULORX_DOWN);
 			frontDownLift.set(false);// front
 			frontUpLift.set(true);
-			// System.out.println("Distance" + this.getDistance());
-
 			// Stop after 8 feet in meters
 			if (this.getDistance() >= 4.2) { // 3.7 2.4384, 2,, 3.6576, 4.877=16
 												// feet
@@ -216,12 +195,7 @@ public class Robot extends IterativeRobot {
 				auto1State = Auto1State.CASTLE_TURN;
 			}
 		} else if (auto1State == Auto1State.CASTLE_TURN) {
-			// double turnAngle = this._gyro.getAngle() + 135.0;
-			// System.out.println("turnAngle" + _gyro.getAngle());
-			// this._gyro.reset();
-			// while (_gyro.getAngle() <= 135.0){
 			myRobot.tankDrive(0.6, -0.6); // (0.6, -0.6) 0.1, 0.85
-			// }
 			System.out.println("castle" + this._aTimer.get());
 			if (this._aTimer.get() >= 1.6) {
 				auto1State = Auto1State.DRIVE_TO_CASTLE;
@@ -258,8 +232,7 @@ public class Robot extends IterativeRobot {
 
 	private void autonomous2() {
 		if (auto2State == Auto2State.DRIVE_REVERSE) {
-			downLift.set(true);// Spatulorx
-			upLift.set(false);
+			setSpatulorx(SPATULORX_DOWN);
 			frontDownLift.set(false);// front
 			frontUpLift.set(true);
 			myRobot.tankDrive(0.7, 0.7);
@@ -303,5 +276,20 @@ public class Robot extends IterativeRobot {
 	private void resetDistance() {
 		this._velocity = 0.0;
 		this._displacement = 0.0;
+	}
+	private void setSpatulorx(boolean liftSpatulorx) {
+		if (liftSpatulorx == true){
+			downLift.set(false);// Spatulorx
+			upLift.set(true);
+		}
+		else {
+			downLift.set(true);// Spatulorx down 
+			upLift.set(false);	
+		}		
+
+	}
+	private void setClimbing(double climbingSpeed){
+		climber1.set(climbingSpeed);
+		climber2.set(climbingSpeed);
 	}
 }
