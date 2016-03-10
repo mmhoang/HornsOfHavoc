@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class Robot extends IterativeRobot {
+public class Robot_experimental_gyro extends IterativeRobot {
 	Command autonomousCommand;
 	SendableChooser autoChooser;
 
@@ -258,8 +258,13 @@ public class Robot extends IterativeRobot {
 	Auto2State auto2State = Auto2State.DRIVE_REVERSE;
 
 	private void autonomous2() {
+		_gyro.reset();
 		if (auto2State == Auto2State.DRIVE_REVERSE) {
+			
+			//begin gyro code
 			double angle = _gyro.getAngle();
+			myRobot.tankDrive(0.7, 0.7);
+			
 			downLift.set(true);// Spatulorx
 			upLift.set(false);
 			frontDownLift.set(false);// front
