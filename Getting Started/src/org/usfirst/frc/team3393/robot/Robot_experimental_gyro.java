@@ -263,6 +263,8 @@ public class Robot_experimental_gyro extends IterativeRobot {
 			
 			//begin gyro code
 			double angle = _gyro.getAngle();
+			//end gyro code
+			
 			myRobot.tankDrive(0.7, 0.7);
 			
 			downLift.set(true);// Spatulorx
