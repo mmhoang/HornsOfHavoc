@@ -25,11 +25,12 @@ public class Robot extends IterativeRobot {
 	RobotDrive myRobot;
 	Joystick left, right, control;
 	Solenoid downLift, upLift;
-	Solenoid frontDownLift, frontUpLift;
-	int toggle;
+
 	Victor shooter;
-	Victor climber1;
-	Victor climber2;
+	Victor winch1;
+	Victor winch2;
+	Solenoid climber1;
+	Solenoid climber2;
 	Timer _aTimer;
 	Accelerometer _accelerometer;
 
@@ -40,8 +41,9 @@ public class Robot extends IterativeRobot {
 	Timer _eTimer;
 	boolean SPATULORX_DOWN = false;
 	boolean SPATULORX_UP = true;
-	double CLIMBING_SPEED_RELEASE = 0.3;
-	double CLIMBING_SPEED_RETURN = -0.8;
+	boolean ARM_UP = true; 
+	boolean ARM_DOWN = false; 
+	
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -51,24 +53,31 @@ public class Robot extends IterativeRobot {
 		server.setQuality(50); //50
 		server.startAutomaticCapture("cam0");
 		
-
 		autoChooser = new SendableChooser();
 		autoChooser.addDefault("Autonomous 1: Drive REVERSE over low bar, turn, drive forward, shoot", "autonomous1");
 		autoChooser.addObject("Autonomous 2: Drive REVERSE over low bar, stop", "autonomous2");
 		autoChooser.addObject("Autonomous 3: Driver FORWARD over rough terrain, stop", "autonomous3");
 		SmartDashboard.putData("Autonomous Modes", autoChooser);
-		toggle = 3;
-		shooter = new Victor(6);
-		climber1 = new Victor(4);
-		climber2 = new Victor(5);
-		frontDownLift = new Solenoid(2); // 4 and 5
-		frontUpLift = new Solenoid(3);
-		myRobot = new RobotDrive(0, 1, 2, 3); // Added Motors 2 and 3 to make
-												// all motors run
+		
+		// Robot drive connected to motor ports 0-3
+		myRobot = new RobotDrive(0, 1, 2, 3); 
 		right = new Joystick(1);
 		left = new Joystick(3);
-		downLift = new Solenoid(0); // 6 and 7
+		
+		// Spatulorx connected to pneumatics 0, 1
+		downLift = new Solenoid(0); 
 		upLift = new Solenoid(1);
+		
+		// Low ball shooter connected to motor port 6
+		shooter = new Victor(6);
+		
+		// Climbing pistons connected to pneumatics 4, 5
+		climber1 = new Solenoid(4);
+		climber2 = new Solenoid(5);
+		
+		// Climbing motors connected to motor ports 4, 5
+		winch1 = new Victor(4);
+		winch2 = new Victor(5);
 
 		this._aTimer = new Timer();
 		this._accelerometer = new BuiltInAccelerometer();
@@ -139,30 +148,40 @@ public class Robot extends IterativeRobot {
 
 		myRobot.tankDrive(left, right);
 
-		// This works!
-		// press and release for joystick number 5 motor
-		// Using IF - ELSE IF - ELSE allows teleopPeriodic to continue looping
-		// (a WHILE loop would be stuck until the button was released)
-		if (right.getRawButton(2)) { // Ball grabbers
-			shooter.set(1.0);
-		} else if (right.getRawButton(3)) {
-			shooter.set(-1.0);
-		} else
-			shooter.set(0.0);
-
+		// Spatulorx (LEFT joystick)
 		if (left.getRawButton(4)) { // fork pneumatics
 			setSpatulorx(SPATULORX_DOWN);
 		} else if (left.getRawButton(5)) {
 			setSpatulorx(SPATULORX_UP);
-		}  
-		
-		if (right.getRawButton(7)) {
-			setClimbing(CLIMBING_SPEED_RELEASE);
-		} else if (right.getRawButton(8)) {	
-			setClimbing(CLIMBING_SPEED_RETURN);
-		} else {
-			setClimbing(0);	
 		}
+		
+		// Ball intake (RIGHT joystick)
+		if (right.getRawButton(2)) {	
+			shooter.set(1.0);
+		} else if (right.getRawButton(3)) {
+			shooter.set(-1.0);
+		} else {
+			shooter.set(0.0);
+		}
+			
+		// Climbing bimbas (LEFT joystick)
+		if (left.getRawButton(6)) {
+			setClimbing(ARM_UP);
+		} else if (left.getRawButton(7)) {
+			setClimbing(ARM_DOWN);
+		}
+		  
+		// Climbing winch (LEFT joystick)
+		if (left.getRawButton(8)) {
+			winch1.set(1.0);
+			winch2.set(1.0);
+		} else if (left.getRawButton(9)) {	
+			winch1.set(-1.0);
+			winch2.set(-1.0);
+		} else  {
+			winch1.set(0.0);
+			winch2.set(0.0);	
+		} 
 
 	}
 
@@ -181,10 +200,9 @@ public class Robot extends IterativeRobot {
 
 	private void autonomous1() {
 		if (auto1State == Auto1State.DRIVE_REVERSE) {
-			myRobot.tankDrive(0.7, 0.7);
+			setClimbing(ARM_DOWN);
 			setSpatulorx(SPATULORX_DOWN);
-			frontDownLift.set(false);// front
-			frontUpLift.set(true);
+			myRobot.tankDrive(0.7, 0.7);
 			// Stop after 8 feet in meters
 			if (this.getDistance() >= 4.2) { // 3.7 2.4384, 2,, 3.6576, 4.877=16
 												// feet
@@ -194,7 +212,8 @@ public class Robot extends IterativeRobot {
 
 				auto1State = Auto1State.CASTLE_TURN;
 			}
-		} else if (auto1State == Auto1State.CASTLE_TURN) {
+		} else if (auto1State == Auto1State.CASTLE_TURN){
+			setClimbing(ARM_DOWN);
 			myRobot.tankDrive(0.6, -0.6); // (0.6, -0.6) 0.1, 0.85
 			System.out.println("castle" + this._aTimer.get());
 			if (this._aTimer.get() >= 1.6) {
@@ -232,9 +251,8 @@ public class Robot extends IterativeRobot {
 
 	private void autonomous2() {
 		if (auto2State == Auto2State.DRIVE_REVERSE) {
+			setClimbing(ARM_DOWN);
 			setSpatulorx(SPATULORX_DOWN);
-			frontDownLift.set(false);// front
-			frontUpLift.set(true);
 			myRobot.tankDrive(0.7, 0.7);
 			if (this.getDistance() >= 4.2) {
 
@@ -253,6 +271,7 @@ public class Robot extends IterativeRobot {
 
 	private void autonomous3() {
 		if (auto3State == Auto3State.DRIVE_FORWARD) {
+			setClimbing(ARM_DOWN);
 			myRobot.tankDrive(-0.9, -0.9);
 			if (this.getDistance() >= 5.1) {
 
@@ -277,6 +296,7 @@ public class Robot extends IterativeRobot {
 		this._velocity = 0.0;
 		this._displacement = 0.0;
 	}
+	
 	private void setSpatulorx(boolean liftSpatulorx) {
 		if (liftSpatulorx == true){
 			downLift.set(false);// Spatulorx
@@ -288,8 +308,14 @@ public class Robot extends IterativeRobot {
 		}		
 
 	}
-	private void setClimbing(double climbingSpeed){
-		climber1.set(climbingSpeed);
-		climber2.set(climbingSpeed);
+	
+	private void setClimbing(boolean winchUp) {
+		if (winchUp == true) {
+			climber1.set(false);
+			climber2.set(true);
+		} else {
+			climber1.set(true);
+			climber2.set(false);
+		}
 	}
 }
